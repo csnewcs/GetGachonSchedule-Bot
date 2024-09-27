@@ -11,7 +11,6 @@ namespace GetGachonScheduleBot
     static void Main(string[] args) => new Program().StartBot().GetAwaiter().GetResult();
     public async Task StartBot()
     {
-
       DiscordBotConfig config;
       try
       {
@@ -29,12 +28,6 @@ namespace GetGachonScheduleBot
           return;
         }
       }
-      client = new DiscordSocketClient();
-      client.Log += Log;
-      client.Ready += async () =>
-      {
-        await Log(new LogMessage(LogSeverity.Info, "Bot", "Bot is ready."));
-      };
       await client.LoginAsync(TokenType.Bot, config.Token);
       await client.StartAsync();
       await Task.Delay(-1);
@@ -55,6 +48,21 @@ namespace GetGachonScheduleBot
       }
       Console.WriteLine($"[{DateTime.Now}] {msg.Message}");
     }
-
+    private void SetClientEvent()
+    {
+      client = new DiscordSocketClient();
+      client.Log += Log;
+      client.SlashCommandExecuted += async (SocketSlashCommand command) =>
+      {
+        if (SlashCommands.Commands.ContainsKey(command.CommandName))
+        {
+          await SlashCommands.Commands[command.CommandName](command);
+        }
+      };
+      client.Ready += async () =>
+      {
+        await Log(new LogMessage(LogSeverity.Info, "Bot", "Bot is ready."));
+      };
+    }
   }
 }
