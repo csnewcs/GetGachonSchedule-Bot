@@ -51,7 +51,7 @@ struct DiscordBotConfig
     if (!File.Exists(DBFilePath))
     {
       DBConnection.Open();
-      string sql = "CREATE TABLE AccountInfo (discordId VARCHAR(20) PRIMARY KEY, gachonId TEXT, gachonPw TEXT, googleId TEXT)";
+      string sql = "CREATE TABLE AccountInfo (discordId VARCHAR(20) PRIMARY KEY, gachonId TEXT, gachonPw TEXT, googleId TEXT, calendarId TEXT);";
       SqliteCommand command = new SqliteCommand(sql, DBConnection);
       command.ExecuteNonQuery();
       DBConnection.Close();

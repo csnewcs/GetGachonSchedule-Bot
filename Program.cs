@@ -8,10 +8,10 @@ namespace GetGachonScheduleBot
   class Program
   {
     DiscordSocketClient client;
+    DiscordBotConfig config;
     static void Main(string[] args) => new Program().StartBot().GetAwaiter().GetResult();
     public async Task StartBot()
     {
-      DiscordBotConfig config;
       try
       {
         config = new DiscordBotConfig();
@@ -57,9 +57,10 @@ namespace GetGachonScheduleBot
       {
         if (SlashCommands.Commands.ContainsKey(command.CommandName))
         {
-          await SlashCommands.Commands[command.CommandName](command);
+          await SlashCommands.Commands[command.CommandName].Item2(command);
         }
       };
+      client.InteractionCreated += interactionCreated;
       client.Ready += async () =>
       {
         await addCommands();
@@ -69,9 +70,30 @@ namespace GetGachonScheduleBot
     {
       foreach (var guild in client.Guilds)
       {
-        var cmd = new SlashCommandBuilder().WithName("help").WithDescription("show commands");
-        await guild.CreateApplicationCommandAsync(cmd.Build());
-        Log(new LogMessage(LogSeverity.Info, "MakeCommand", $"{guild.Name} command created"));
+        foreach(var c in await guild.GetApplicationCommandsAsync())
+        {
+          await c.DeleteAsync();
+          await Log(new LogMessage(LogSeverity.Info, "MakeCommand", $"{guild.Name} command {c.Name} deleted"));
+        }
+        foreach (var c in SlashCommands.Commands.Values)
+        {
+          await guild.CreateApplicationCommandAsync(c.Item1.Build());
+          await Log(new LogMessage(LogSeverity.Info, "MakeCommand", $"{guild.Name} command {c.Item1.Name} created"));
+        }
+      }
+    }
+    private async Task interactionCreated (SocketInteraction interaction)
+    {
+      if (interaction is SocketMessageComponent component)
+      {
+        if (component.Data.CustomId.StartsWith("EnrollApply"))
+        {
+          var userId = ulong.Parse(component.Data.CustomId.Split(" ")[1]);
+          if(SlashCommands.EnrollQueue.ContainsKey(userId))
+          {
+            await SlashCommands.EnrollQueue[userId].Apply(config, interaction);
+          }
+        }
       }
     }
   }
