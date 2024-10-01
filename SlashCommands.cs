@@ -10,8 +10,13 @@ namespace GetGachonScheduleBot
     public static Dictionary<string, Func<SocketSlashCommand, Task>> Commands = new Dictionary<string, Func<SocketSlashCommand, Task>>
     {
       {
-        "Help", async (SocketSlashCommand command) => {
+        "help", async (SocketSlashCommand command) => {
           await command.RespondAsync("TEST", ephemeral: true);
+        }
+      },
+      {
+        "Enroll", async (SocketSlashCommand command) => {
+          Console.WriteLine(command.Data);
         }
       }
     };

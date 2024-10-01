@@ -28,6 +28,7 @@ namespace GetGachonScheduleBot
           return;
         }
       }
+      setClientEvent();
       await client.LoginAsync(TokenType.Bot, config.Token);
       await client.StartAsync();
       await Task.Delay(-1);
@@ -46,9 +47,9 @@ namespace GetGachonScheduleBot
       {
         Console.ForegroundColor = ConsoleColor.White;
       }
-      Console.WriteLine($"[{DateTime.Now}] {msg.Message}");
+      Console.WriteLine($"[{DateTime.Now}] {msg.Message} {msg.Exception}");
     }
-    private void SetClientEvent()
+    private void setClientEvent()
     {
       client = new DiscordSocketClient();
       client.Log += Log;
@@ -61,8 +62,17 @@ namespace GetGachonScheduleBot
       };
       client.Ready += async () =>
       {
-        await Log(new LogMessage(LogSeverity.Info, "Bot", "Bot is ready."));
+        await addCommands();
       };
+    }
+    private async Task addCommands()
+    {
+      foreach (var guild in client.Guilds)
+      {
+        var cmd = new SlashCommandBuilder().WithName("help").WithDescription("show commands");
+        await guild.CreateApplicationCommandAsync(cmd.Build());
+        Log(new LogMessage(LogSeverity.Info, "MakeCommand", $"{guild.Name} command created"));
+      }
     }
   }
 }
