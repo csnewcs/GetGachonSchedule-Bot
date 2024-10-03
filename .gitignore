@@ -2,3 +2,4 @@
 bin/
 obj/
 *.sqlite
+google.json

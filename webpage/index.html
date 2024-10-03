@@ -1,0 +1,22 @@
+<!--enroll page hosted via nginx-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구글 계정 확인</title>
+</head>
+<body>
+    <script>
+        window.onload = () => {
+            let params = window.location.search.substring(1);
+    
+            let code = new URLSearchParams(params).get('code');
+            let p = document.createElement('p');
+            p.innerText = code;
+            document.body.appendChild(p);
+        }
+    </script>
+    <p>다음 코드를 디스코드에 붙여넣어 주세요</p>
+</body>
+</html>

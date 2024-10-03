@@ -8,19 +8,19 @@ namespace GetGachonScheduleBot
   class Program
   {
     DiscordSocketClient client;
-    DiscordBotConfig config;
+    public static DiscordBotConfig Config {get; set;}
     static void Main(string[] args) => new Program().StartBot().GetAwaiter().GetResult();
     public async Task StartBot()
     {
       try
       {
-        config = new DiscordBotConfig();
+        Config = new DiscordBotConfig();
       }
       catch (Exception e)
       {
         if (e.Message == "The environment variable is not set.")
         {
-          config = DiscordBotConfig.MakeConfig();
+          Config = DiscordBotConfig.MakeConfig();
         }
         else
         {
@@ -29,7 +29,7 @@ namespace GetGachonScheduleBot
         }
       }
       setClientEvent();
-      await client.LoginAsync(TokenType.Bot, config.Token);
+      await client.LoginAsync(TokenType.Bot, Config.Token);
       await client.StartAsync();
       await Task.Delay(-1);
     }
@@ -61,10 +61,8 @@ namespace GetGachonScheduleBot
         }
       };
       client.InteractionCreated += interactionCreated;
-      client.Ready += async () =>
-      {
-        await addCommands();
-      };
+      client.ModalSubmitted += modalSubmitted;
+      client.Ready += addCommands;
     }
     private async Task addCommands()
     {
@@ -91,8 +89,27 @@ namespace GetGachonScheduleBot
           var userId = ulong.Parse(component.Data.CustomId.Split(" ")[1]);
           if(SlashCommands.EnrollQueue.ContainsKey(userId))
           {
-            await SlashCommands.EnrollQueue[userId].Apply(config, interaction);
+            await SlashCommands.EnrollQueue[userId].Apply(Config, interaction);
           }
+        }
+        else if (component.Data.CustomId.StartsWith("GoogleCode"))
+        {
+          var userId = ulong.Parse(component.Data.CustomId.Split(" ")[1]);
+          if(SlashCommands.EnrollQueue.ContainsKey(userId))
+          {
+            await SlashCommands.EnrollQueue[userId].OpenGoogleCodeModal(interaction);
+          }
+        }
+      }
+    }
+    private async Task modalSubmitted(SocketModal modal)
+    {
+      if (modal.Data.CustomId.StartsWith("GoogleCode"))
+      {
+        var userId = ulong.Parse(modal.Data.CustomId.Split(" ")[1]);
+        if(SlashCommands.EnrollQueue.ContainsKey(userId))
+        {
+          await SlashCommands.EnrollQueue[userId].InputedGoogleCode(Config, modal);
         }
       }
     }
