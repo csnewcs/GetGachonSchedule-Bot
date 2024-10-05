@@ -33,7 +33,7 @@ namespace GetGachonScheduleBot
       await client.StartAsync();
       await Task.Delay(-1);
     }
-    private async Task Log(LogMessage msg)
+    public static Task Log(LogMessage msg)
     {
       if (msg.Severity == LogSeverity.Critical || msg.Severity == LogSeverity.Error)
       {
@@ -48,6 +48,7 @@ namespace GetGachonScheduleBot
         Console.ForegroundColor = ConsoleColor.White;
       }
       Console.WriteLine($"[{DateTime.Now}] {msg.Message} {msg.Exception}");
+      return Task.CompletedTask;
     }
     private void setClientEvent()
     {

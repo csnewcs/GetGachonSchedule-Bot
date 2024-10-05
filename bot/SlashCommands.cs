@@ -21,7 +21,6 @@ namespace GetGachonScheduleBot
             return;
           }
           var options = command.Data.Options.ToDictionary(x => x.Name, x => x.Value.ToString());
-          // if()
           EnrollQueue.Add(command.User.Id, new Enroll(command.User.Id, options["gachon_id"], options["gachon_pw"]));
           var returnMessageButton = ButtonBuilder.CreateDangerButton("정말 가입하시겠습니까?", $"EnrollApply {command.User.Id}");
           await command.RespondAsync("정말 가입하시겠습니까? 당신의 가천대학교 비밀번호는 데이터베이스에 **평문 혹은 복호화 가능한 암호화가 적용되어** 저장됩니다. 이는 보안상 굉장히 취약하니 반드시 고려해주시길 바랍니다.", components: new ComponentBuilder().WithButton(returnMessageButton).Build(), ephemeral: true);
@@ -29,11 +28,17 @@ namespace GetGachonScheduleBot
       },
       {
         "탈퇴", new Tuple<SlashCommandBuilder, Func<SocketSlashCommand, Task>>(new SlashCommandBuilder().WithName("탈퇴").WithDescription("서비스에서 탈퇴합니다"), async (SocketSlashCommand command) => {
-          Console.WriteLine(command.Data);
+          if(!Database.IsExistUser(Program.Config.DBConnection, command.User.Id)) {
+            await command.RespondAsync("가입되어 있지 않습니다.", ephemeral: true);
+            return;
+          }
+          Database.RemoveUser(Program.Config.DBConnection, command.User.Id);
+          await command.RespondAsync("탈퇴되었습니다.", ephemeral: true);
         })
       },
       {
         "수정", new Tuple<SlashCommandBuilder, Func<SocketSlashCommand, Task>>(new SlashCommandBuilder().WithName("수정").WithDescription("비밀번호 등 정보를 수정합니다"), async (SocketSlashCommand command) => {
+          await command.RespondAsync("개발 중인 기능입니다.", ephemeral: true);
           Console.WriteLine(command.Data);
         })
       }

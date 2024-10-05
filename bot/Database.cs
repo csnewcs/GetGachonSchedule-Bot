@@ -17,4 +17,11 @@ class Database {
         connection.Close();
         return result;
     }
+    public static void RemoveUser(SqliteConnection connection, ulong discordId) {
+        connection.Open();
+        string sql = $"DELETE FROM AccountInfo WHERE discordId = '{discordId}';";
+        SqliteCommand command = new SqliteCommand(sql, connection);
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
 }

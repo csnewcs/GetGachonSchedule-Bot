@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Web;
 using Discord;
@@ -11,13 +8,13 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
+using GetGachonScheduleBot;
 
 class Enroll
 {
     readonly ulong userId;
     readonly string gachonID;
     readonly string gachonPW;
-    readonly string googleID;
     public Enroll(ulong userId, string gachonID, string gachonPW)
     {
         this.userId = userId;
@@ -38,6 +35,7 @@ class Enroll
             });
         } else {
             await interaction.FollowupAsync("가천대학교 아이디 또는 비밀번호를 잘못 입력하였습니다.", ephemeral: true);
+            SlashCommands.EnrollQueue.Remove(userId);
             return;
         }
         //2. 구글 계정 API 요청
@@ -88,7 +86,6 @@ class Enroll
             {"grant_type", "authorization_code"}
         }));
         string credentialString = await token.Content.ReadAsStringAsync();
-        // Console.WriteLine(credentialString);
 
         GoogleAuthorizationCodeFlow googleAuthFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer() {
             ClientSecrets = new ClientSecrets {
@@ -98,7 +95,6 @@ class Enroll
             Scopes = [CalendarService.Scope.Calendar],
         });
         var tokenResponse = System.Text.Json.JsonSerializer.Deserialize<TokenResponse>(credentialString);
-        // Console.WriteLine($"access token: {tokenResponse.access_token}\nrefresh token: {tokenResponse.refresh_token}\nexpires_in: {tokenResponse.expires_in}\ntoken_type: {tokenResponse.token_type}\nscope: {tokenResponse.scope}\nid_token: {tokenResponse.id_token}");
         GoogleCredential googleCredential = GoogleCredential.FromAccessToken(tokenResponse.access_token);
         var service = new CalendarService(new BaseClientService.Initializer() {
             HttpClientInitializer = googleCredential
@@ -116,10 +112,7 @@ class Enroll
             m.Content = "가입이 완료되었습니다.";
             m.Components = null;
         });
-
-    }
-    private void makeGachonCalendarInGoogle() {
-
+        await Program.Log(new LogMessage(LogSeverity.Info, "Enroll", $"User {userId} enrolled"));
     }
 }
 struct TokenResponse {

@@ -23,17 +23,17 @@ struct DiscordBotConfig
   }
   public static DiscordBotConfig MakeConfig()
   {
-    string token = "", dbFilePath = Directory.GetCurrentDirectory() + "/db.sqlite", googleOauthId = "", googleOauthSecret = "", redirectUrl = "";
+    string? token = "", dbFilePath = Directory.GetCurrentDirectory() + "/db.sqlite", googleOauthId = "", googleOauthSecret = "", redirectUrl = "";
     Console.WriteLine("봇 환경 설정을 시작합니다.");
     string environmentVariable = "";
 
-    while(token == "") {
+    while(string.IsNullOrEmpty(token)) {
       Console.Write("봇 토큰을 입력해주세요.");
       token = Console.ReadLine();
     }
     environmentVariable += token + ";";
 
-    string temp;
+    string? temp;
     Console.Write($"봇의 데이터베이스 파일 경로를 입력해주세요.(기본값: {dbFilePath})\n>");
     temp = Console.ReadLine();
     dbFilePath = string.IsNullOrEmpty(temp) ? dbFilePath : temp;
@@ -82,9 +82,9 @@ struct DiscordBotConfig
   }
   private static void setEnvironmentVariableOnLinux(string name, string value)
   {
-    string shell = Environment.GetEnvironmentVariable("SHELL");
+    string? shell = Environment.GetEnvironmentVariable("SHELL");
     string command = $"\nexport {name}=\"{value}\"";
-    string home = Environment.GetEnvironmentVariable("HOME");
+    string? home = Environment.GetEnvironmentVariable("HOME");
     if (shell == null)
     {
       Console.WriteLine("Shell is not set.");
