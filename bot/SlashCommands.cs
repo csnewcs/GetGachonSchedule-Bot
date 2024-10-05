@@ -33,6 +33,7 @@ namespace GetGachonScheduleBot
             return;
           }
           Database.RemoveUser(Program.Config.DBConnection, command.User.Id);
+          await Program.Log(new LogMessage(LogSeverity.Info, "Exit", $"User {command.User.Id} exit"));
           await command.RespondAsync("탈퇴되었습니다.", ephemeral: true);
         })
       },

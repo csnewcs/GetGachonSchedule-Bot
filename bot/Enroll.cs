@@ -111,6 +111,7 @@ class Enroll
         await interaction.ModifyOriginalResponseAsync(m => {
             m.Content = "가입이 완료되었습니다.";
             m.Components = null;
+            m.Flags = MessageFlags.Ephemeral;
         });
         await Program.Log(new LogMessage(LogSeverity.Info, "Enroll", $"User {userId} enrolled"));
     }
