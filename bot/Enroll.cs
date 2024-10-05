@@ -9,12 +9,14 @@ using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using GetGachonScheduleBot;
+using Discord.Interactions;
 
 class Enroll
 {
     readonly ulong userId;
     readonly string gachonID;
     readonly string gachonPW;
+    SocketInteraction originInteraction;
     public Enroll(ulong userId, string gachonID, string gachonPW)
     {
         this.userId = userId;
@@ -23,6 +25,7 @@ class Enroll
     }
     public async Task Apply(DiscordBotConfig config, SocketInteraction interaction) {
         await interaction.DeferAsync();
+        originInteraction = interaction;
         var originalRespond = await interaction.GetOriginalResponseAsync();
         await originalRespond.ModifyAsync(m => {
             m.Components = null;
@@ -76,7 +79,7 @@ class Enroll
     public async Task InputedGoogleCode(DiscordBotConfig config, SocketModal interaction) {
         const string TOKEN_URL = "https://oauth2.googleapis.com/token";
         var code = interaction.Data.Components.ToList();
-        await interaction.DeferLoadingAsync();
+        await interaction.DeferLoadingAsync(true);
         HttpClient client = new HttpClient();
         var token = await client.PostAsync(TOKEN_URL, new FormUrlEncodedContent(new Dictionary<string, string> {
             {"code", code[0].Value},
@@ -107,13 +110,13 @@ class Enroll
         var upload = service.Calendars.Insert(calendar).Execute();
         
         Database.InsertNewUser(config.DBConnection, userId, gachonID, gachonPW, credentialString.Replace("\n", ""), upload.Id);
-        
-        await interaction.UpdateAsync(m => {
+        await interaction.ModifyOriginalResponseAsync(m => {
             m.Content = "가입이 완료되었습니다.";
             m.Components = null;
-            m.Attachments = null;
         });
         await Program.Log(new LogMessage(LogSeverity.Info, "Enroll", $"User {userId} enrolled"));
+        SlashCommands.EnrollQueue.Remove(userId);
+        await originInteraction.DeleteOriginalResponseAsync();
     }
 }
 struct TokenResponse {
