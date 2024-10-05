@@ -106,7 +106,7 @@ class Enroll
         
         var upload = service.Calendars.Insert(calendar).Execute();
         
-        Database.InsertNewUser(config.DBConnection, userId, gachonID, gachonPW, credentialString, upload.Id);
+        Database.InsertNewUser(config.DBConnection, userId, gachonID, gachonPW, credentialString.Replace("\n", ""), upload.Id);
         
         await interaction.ModifyOriginalResponseAsync(m => {
             m.Content = "가입이 완료되었습니다.";
