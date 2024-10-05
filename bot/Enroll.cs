@@ -108,10 +108,10 @@ class Enroll
         
         Database.InsertNewUser(config.DBConnection, userId, gachonID, gachonPW, credentialString.Replace("\n", ""), upload.Id);
         
-        await interaction.ModifyOriginalResponseAsync(m => {
+        await interaction.UpdateAsync(m => {
             m.Content = "가입이 완료되었습니다.";
             m.Components = null;
-            m.Flags = MessageFlags.Ephemeral;
+            m.Attachments = null;
         });
         await Program.Log(new LogMessage(LogSeverity.Info, "Enroll", $"User {userId} enrolled"));
     }
