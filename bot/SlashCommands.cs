@@ -38,9 +38,16 @@ namespace GetGachonScheduleBot
         })
       },
       {
-        "수정", new Tuple<SlashCommandBuilder, Func<SocketSlashCommand, Task>>(new SlashCommandBuilder().WithName("수정").WithDescription("비밀번호 등 정보를 수정합니다"), async (SocketSlashCommand command) => {
-          await command.RespondAsync("개발 중인 기능입니다.", ephemeral: true);
-          Console.WriteLine(command.Data);
+        "수정", new Tuple<SlashCommandBuilder, Func<SocketSlashCommand, Task>>(new SlashCommandBuilder().WithName("수정").WithDescription("비밀번호 등 정보를 수정합니다").AddOption(new SlashCommandOptionBuilder().WithName("new_gachon_pw").WithDescription("새로운 가천대학교 비밀번호").WithType(ApplicationCommandOptionType.String).WithRequired(true)), async (SocketSlashCommand command) => {
+          if(!Database.IsExistUser(Program.Config.DBConnection, command.User.Id))
+          {
+            await command.RespondAsync("가입되어 있지 않습니다.", ephemeral: true);
+            return;
+          }
+          var options = command.Data.Options.ToDictionary(x => x.Name, x => x.Value.ToString());
+          Database.UpdateGachonPassword(Program.Config.DBConnection, command.User.Id, options["new_gachon_pw"]);
+          await command.RespondAsync("변경이 완료되었습니다. 다음 캘린더 업데이트부터 반영됩니다.", ephemeral: true);
+          return;
         })
       }
     };
